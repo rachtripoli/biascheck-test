@@ -1,5 +1,2 @@
 streamlit
 annotated_text
-transformers=4.37.2
-tensorflow=2.15
-tf_keras=2.15.1
