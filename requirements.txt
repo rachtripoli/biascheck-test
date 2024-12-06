@@ -1,3 +1,2 @@
-streamlit
 annotated_text
 transformers==4.37.2

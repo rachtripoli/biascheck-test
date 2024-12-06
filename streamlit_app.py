@@ -7,15 +7,12 @@ data={"example_id": [0, 1], "original_text":["Creation science (or cs) is an uns
 
 df=pd.DataFrame(data=data)
 
-# from PIL import Image
-# img = Image.open("biaschecklogo.png").convert('RGBA')
-# img_array = np.array(img)
-
-# Convert to NumPy array
+from PIL import Image
+img = Image.open("biaschecklogo.png").convert('RGBA')
 
 st.set_page_config(
     page_title="BIASCheck",
-    #page_icon=img_array,
+    page_icon=img,
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -27,13 +24,13 @@ st.set_page_config(
 
 col1, col2 = st.columns([0.09, 0.91], vertical_alignment="center")
 
-scale_factor = 0.075
-#new_width = int(img.width * scale_factor)
-#new_height = int(img.height * scale_factor)
-#img_resized = img.resize((new_width, new_height), Image.ANTIALIAS)
-#img_array_small = np.array(img_resized)
+scale_factor = 2.5
+new_width = int(img.width * scale_factor)
+new_height = int(img.height * scale_factor)
+img_resized = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
-
+with col1:
+    st.image(img_resized)
 with col2:
     st.title("BIASCheck")
     
@@ -59,5 +56,3 @@ if text:
         st.markdown("**BIASCheck's neutralized version is**: \n{}".format(neutral))
     else:
         st.markdown("**BIASCheck has determined this text is neutral.**".format())
-    
-                    
