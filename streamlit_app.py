@@ -7,6 +7,7 @@ from transformers import DistilBertTokenizer
 from tensorflow import keras
 from keras import models
 import transformers
+import boto3
 from st_files_connection import FilesConnection
 
 # aws_access_key_id = st.secrets["aws_access_key_id"]
@@ -30,7 +31,18 @@ from st_files_connection import FilesConnection
 # with open("distilbert_cls_model.h5", "wb") as f:
 #     f.write(response.content)
 
-conn = st.connection('s3', type=FilesConnection)
+session = boto3.Session(
+    aws_access_key_id=st.secrets["aws_access_key_id"],
+    aws_secret_access_key=st.secrets["aws_secret_access_key"],
+    region_name="us-east-1",
+)
+
+conn = FilesConnection(
+    type="s3", 
+    session=session,
+)
+
+
 model1 = conn.open("biascheck-232442840523-us-east-1/distilbert_cls_model.h5")
 
 cls_model = models.load_model(model1, custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
