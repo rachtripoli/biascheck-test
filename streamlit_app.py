@@ -10,8 +10,8 @@ import transformers
 import requests
 import boto3
 
-aws_access_key_id = st.secrets["access_key_id"]
-aws_secret_access_key = st.secrets["secret_access_key"]
+aws_access_key_id = st.secrets["aws_access_key_id"]
+aws_secret_access_key = st.secrets["aws_secret_access_key"]
 region = st.secrets["region"]
 
 session = boto3.Session(profile_name="streamlit1")
