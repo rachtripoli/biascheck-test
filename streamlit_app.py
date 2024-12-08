@@ -7,8 +7,12 @@ from transformers import DistilBertTokenizer
 from tensorflow import keras
 from keras import models
 import transformers
-import boto3
 from st_files_connection import FilesConnection
+import tempfile
+import zipfile
+import s3fs
+
+
 
 # aws_access_key_id = st.secrets["aws_access_key_id"]
 # aws_secret_access_key = st.secrets["aws_secret_access_key"]
@@ -31,21 +35,27 @@ from st_files_connection import FilesConnection
 # with open("distilbert_cls_model.h5", "wb") as f:
 #     f.write(response.content)
 
-session = boto3.Session(
-    aws_access_key_id=st.secrets["aws_access_key_id"],
-    aws_secret_access_key=st.secrets["aws_secret_access_key"],
-    region_name="us-east-1",
-)
+aws_access_key_id=st.secrets["aws_access_key_id"]
+aws_secret_access_key=st.secrets["aws_secret_access_key"]
+region_name="us-east-1"
+BUCKET_NAME = "biascheck-232442840523-us-east-1"
+model_name = "classification_model_12082024.zip"
 
-conn = FilesConnection(
-    type="s3", 
-    session=session,
-)
+def get_s3fs():
+  return s3fs.S3FileSystem(key=aws_access_key_id, secret=aws_secret_access_key)
 
-
-model1 = conn.open("biascheck-232442840523-us-east-1/distilbert_cls_model.h5")
-
-cls_model = models.load_model(model1, custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
+def s3_get_keras_model(model_name: str) -> keras.Model:
+  with tempfile.TemporaryDirectory() as tempdir:
+    s3fs = get_s3fs()
+    # Fetch and save the zip file to the temporary directory
+    s3fs.get(f"s3://{BUCKET_NAME}/{model_name}", f"{tempdir}/{model_name}.zip")
+    # Extract the model zip file within the temporary directory
+    with zipfile.ZipFile(f"{tempdir}/{model_name}.zip") as zip_ref:
+        zip_ref.extractall(f"{tempdir}/{model_name}")
+    # Load the keras model from the temporary directory
+    return keras.models.load_model(f"{tempdir}/{model_name}", custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
+  
+cls_model=s3_get_keras_model(model_name)
 
 from PIL import Image
 img = Image.open("biaschecklogo.png").convert('RGBA')
