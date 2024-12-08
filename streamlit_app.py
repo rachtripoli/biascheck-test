@@ -10,9 +10,9 @@ import transformers
 import requests
 import boto3
 
-aws_access_key_id = st.secrets["aws"]["access_key_id"]
-aws_secret_access_key = st.secrets["aws"]["secret_access_key"]
-region = st.secrets["aws"]["region"]
+aws_access_key_id = st.secrets["access_key_id"]
+aws_secret_access_key = st.secrets["secret_access_key"]
+region = st.secrets["region"]
 
 session = boto3.Session(profile_name="streamlit1")
 s3 = session.client("s3",
