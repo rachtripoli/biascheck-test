@@ -10,8 +10,16 @@ import transformers
 import requests
 import boto3
 
+aws_access_key_id = st.secrets["aws"]["access_key_id"]
+aws_secret_access_key = st.secrets["aws"]["secret_access_key"]
+region = st.secrets["aws"]["region"]
+
 session = boto3.Session(profile_name="streamlit1")
-s3 = session.client("s3")
+s3 = session.client("s3",
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region)
+
 url = s3.generate_presigned_url(
     ClientMethod="get_object",
     Params={"Bucket": "biascheck-232442840523-us-east-1", "Key": "distilbert_cls_model.h5"},
