@@ -7,31 +7,33 @@ from transformers import DistilBertTokenizer
 from tensorflow import keras
 from keras import models
 import transformers
-import requests
-import boto3
+from st_files_connection import FilesConnection
 
-aws_access_key_id = st.secrets["aws_access_key_id"]
-aws_secret_access_key = st.secrets["aws_secret_access_key"]
-region = st.secrets["region"]
+# aws_access_key_id = st.secrets["aws_access_key_id"]
+# aws_secret_access_key = st.secrets["aws_secret_access_key"]
+# region = st.secrets["region"]
 
-session = boto3.Session(profile_name="streamlit1")
-s3 = session.client("s3",
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=region)
+# session = boto3.Session(profile_name="streamlit1")
+# s3 = session.client("s3",
+#             aws_access_key_id=aws_access_key_id,
+#             aws_secret_access_key=aws_secret_access_key,
+#             region_name=region)
 
-url = s3.generate_presigned_url(
-    ClientMethod="get_object",
-    Params={"Bucket": "biascheck-232442840523-us-east-1", "Key": "distilbert_cls_model.h5"},
-    ExpiresIn=3600
-)
+# url = s3.generate_presigned_url(
+#     ClientMethod="get_object",
+#     Params={"Bucket": "biascheck-232442840523-us-east-1", "Key": "distilbert_cls_model.h5"},
+#     ExpiresIn=3600
+# )
 
-# Download and Load Model
-response = requests.get(url)
-with open("distilbert_cls_model.h5", "wb") as f:
-    f.write(response.content)
+# # Download and Load Model
+# response = requests.get(url)
+# with open("distilbert_cls_model.h5", "wb") as f:
+#     f.write(response.content)
 
-cls_model = models.load_model("distilbert_cls_model.h5", custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
+conn = st.connection('s3', type=FilesConnection)
+model1 = conn.read("biascheck-232442840523-us-east-1/distilbert_cls_model.h5", input_format="h5", ttl=3600)
+
+cls_model = models.load_model(model1, custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
 
 from PIL import Image
 img = Image.open("biaschecklogo.png").convert('RGBA')

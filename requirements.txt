@@ -1,4 +1,6 @@
 streamlit
+s3fs==2024.10.0
+st-files-connection
 st-annotated-text
 transformers==4.37.2
 tensorflow==2.15
