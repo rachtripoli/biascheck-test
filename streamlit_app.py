@@ -31,7 +31,7 @@ from st_files_connection import FilesConnection
 #     f.write(response.content)
 
 conn = st.connection('s3', type=FilesConnection)
-model1 = conn.read("biascheck-232442840523-us-east-1/distilbert_cls_model.h5", input_format="h5", ttl=3600)
+model1 = conn.read("biascheck-232442840523-us-east-1/distilbert_cls_model.h5", input_format=None, ttl=3600)
 
 cls_model = models.load_model(model1, custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
 
