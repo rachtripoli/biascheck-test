@@ -2,10 +2,27 @@ import streamlit as st
 from annotated_text import annotated_text, parameters 
 import numpy as np
 import pandas as pd
+import os
+from transformers import DistilBertTokenizer
+from tensorflow import keras
+from keras import models
+import transformers
+import requests
+import boto3
 
-data={"example_id": [0, 1], "original_text":["Creation science (or cs) is an unscientific effort to provide evidence supporting the account of the creation of the universe related in the bible.", "Hyman Bloom (b. Brunavii, Latvia, March 29, 1913) is a painter."], "neutralized_text":["Creation science (or cs) is an effort to provide evidence supporting the account of the creation of the universe related in the bible.", "Neutral"], "bias_detection": ["Biased", "Neutral"], "bias_score": [0.67, 1-0.997]}
+s3 = boto3.client("s3")
+url = s3.generate_presigned_url(
+    ClientMethod="get_object",
+    Params={"Bucket": "biascheck-232442840523-us-east-1", "Key": "distilbert_cls_model.h5"},
+    ExpiresIn=3600
+)
 
-df=pd.DataFrame(data=data)
+# Download and Load Model
+response = requests.get(url)
+with open("distilbert_cls_model.h5", "wb") as f:
+    f.write(response.content)
+
+cls_model = models.load_model("distilbert_cls_model.h5", custom_objects={"TFDistilBertModel": transformers.TFDistilBertModel})
 
 from PIL import Image
 img = Image.open("biaschecklogo.png").convert('RGBA')
@@ -37,22 +54,27 @@ with col2:
 st.subheader("Minimizing subjectivity in language.")
 st.markdown("BIASCheck's objective is to assist writing professionals in checking their subjective biases in written language. Subjective biases are often unconscious and difficult to catch without a second pair of eyes. In the times when you are unable to call on someone else to read your work, call on BIASCheck!")
 
-text = st.selectbox(label="Select a text example to detect and neutralize.", options=df["original_text"], index=None)
+text = st.text_input(label="Enter a text example to classify.", value=None, help="See documentation for tips!", placeholder="Text goes here")
 
 parameters.LABEL_FONT_SIZE = "0 1.5rem"
 
 if text:
-    prompt_split = text
-    bias_detection = df.loc[df['original_text'] == text, 'bias_detection'].iloc[0]
-    if bias_detection == "Biased":
+    MAX_SEQUENCE_LENGTH = 512
+    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-cased')
+    text_tokenized = tokenizer(text,
+              max_length=MAX_SEQUENCE_LENGTH,
+              truncation=True,
+              padding='max_length',
+              return_tensors='tf')
+    predictions = cls_model.predict(dict(text_tokenized))
+    predictions_flat = predictions.flatten()
+    predictions_list = predictions_flat.tolist()
+    predicted_labels = np.where(predictions > 0.5, "Neutral", "Biased")
+    labels_flattened = predicted_labels.flatten().tolist()
+    if predicted_labels == "Biased":
         color = "#ffa421"
     else:
         color = "#21c354"
-    bias_score = df.loc[df['original_text'] == text, 'bias_score'].iloc[0]
-    modified_prompt = (prompt_split, f"Label: {bias_detection}. Score: {bias_score: .1%}", color)
+    bias_score = 1 - predictions_list[0]
+    modified_prompt = (text, f"**BIASCheck**: *{labels_flattened[0]}* Score: {bias_score:.0%}", color)
     annotated_text(modified_prompt)
-    if bias_detection == "Biased":
-        neutral = df.loc[df['original_text'] == text, 'neutralized_text'].iloc[0]
-        st.markdown("**BIASCheck's neutralized version is**: \n{}".format(neutral))
-    else:
-        st.markdown("**BIASCheck has determined this text is neutral.**".format())
