@@ -67,7 +67,11 @@ with col2:
     st.title("BIASCheck")
     
 st.subheader("Minimizing subjectivity in language.")
-st.markdown("BIASCheck's objective is to assist writing professionals in checking their subjective biases in written language. Subjective biases are often unconscious and difficult to catch without a second pair of eyes. In the times when you are unable to call on someone else to read your work, call on BIASCheck!")
+st.markdown("**BIASCheck** defines subjectivity as \"the quality of being based on or influenced by personal feelings, tastes, or opinions.\" "
+            "**BIASCheck**'s objective is to assist writing professionals in checking their subjective biases in written language. "
+            "These kinds of biases are often unconsious and difficult to catch without assistance. "
+            "Call on **BIASCheck** to ensure your communications are neutral!")
+st.write("Please visit our \"About\" tab below for a brief overview of how **BIASCheck** works and best practices to follow in order to ensure a smooth experience with our tool!")
 
 tab1, tab2, tab3 = st.tabs(["The Tool", "About", "Privacy Statement"])
 
@@ -78,7 +82,10 @@ with tab1:
     parameters.LABEL_FONT_SIZE = "0 1.5rem"
 
     if text:
+        # split the text input by sentence
         text_input = text.split(". ")
+
+        # tokenize the input using DistilBert Base Cased
         MAX_SEQUENCE_LENGTH = 512
         tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-cased')
         text_tokenized = tokenizer(text_input,
@@ -86,28 +93,39 @@ with tab1:
                 truncation=True,
                 padding='max_length',
                 return_tensors='tf')
+        
+        # run model and collect predictions
         predictions = cls_model.predict(dict(text_tokenized))
         
-        # predictions_flat = predictions.flatten()
-        # predictions_list = predictions_flat.tolist()
+        # return labels
         predicted_labels = np.where(predictions > 0.5, "Neutral", "Biased")
-        # labels_flattened = predicted_labels.flatten().tolist()
-        # if predicted_labels == "Biased":
-        #     color = "#ffa421"
-        # else:
-        #     color = "#21c354"
-        #[f(x) if condition else g(x) for x in sequence]
 
+        # set label colors
         color = ["#ffa421" if label == "Biased" else "#21c354" for label in predicted_labels]
+
+        # set bias score so 100% is fully biased and 0% is fully neutral
         bias_scores = 1 - predictions
 
+        # find average bias score for whole input
+        avg_bias = np.average(bias_scores)
+        if avg_bias <= 0.5:
+           avg_bias_label = "Neutral"
+        else:
+           avg_bias_label = "Biased"
+        
+        if avg_bias == "Biased":
+           avg_bias_label_color = "#ffa421"
+        else:
+           avg_bias_label_color = "#21c354"
+
+        # set formatting and display input for each sentence using annotated text 
         for i in range(len(text_input)):
             score = bias_scores[i].item() if isinstance(bias_scores[i], np.ndarray) else bias_scores[i]
             label = predicted_labels[i].item() if isinstance(predicted_labels[i], np.ndarray) else predicted_labels[i]
             modified_prompt = (text_input[i], f"**BIASCheck**: *{label}* Score: {score:.0%}", color[i])
             annotated_text(modified_prompt)
-        # modified_prompt = (text, f"**BIASCheck**: *{labels_flattened[0]}* Score: {bias_score:.0%}", color)
-        # annotated_text(modified_prompt)
+        
+        annotated_text(f"Your text input had an average **BIASCheck** score of: {avg_bias:.0%} ", (f"{avg_bias_label} score", "", avg_bias_label_color))
 
 with tab2:
     st.subheader("What is BIASCheck?", divider="blue")
@@ -120,7 +138,7 @@ with tab2:
     st.markdown("#### The Neutralization Task")
     annotated_text("After your text has been classified, if the text is considered ", ("Biased", "", "#ffa421"),
                    " the text is passed through a fine-tuned Llama model to remove subjectivity. The neutralized text is displayed under the classification.")
-    st.markdown("For more information on our data pipeline, technical approach, and decision making, please go to our website: [BIASCheck](https://sites.ischool.berkeley.edu/biascheck/)")
+    st.markdown("For more information about our mission statement, solution, data pipeline, and technical approach, please go to our website: [BIASCheck](https://sites.ischool.berkeley.edu/biascheck/)")
     st.markdown("")
     st.subheader("BIASCheck Best Practices", divider="blue")
     st.write(f"In order to ensure a smooth experience with **BIASCheck**, we recommend the following practices:\n"
@@ -128,8 +146,60 @@ with tab2:
              "2. ")
     
     with tab3:
-       st.subheader("Privacy Statement", divider = "gray")
-       st.markdown("#### Privacy Statement")
+       st.subheader(f"Privacy Statement for **BIASCheck**", divider = "gray")
+       st.markdown("#### Effective Date: December 10, 2024")
+       st.write(f"At **BIASCheck**, your privacy is of utmost importance. "
+                "This Privacy Statement explains how we handle your information when you use our services. "
+                "By using our platform, you agree to the practices described below.")
+       st.markdown("##### 1. Information We Collect")
+       st.write("We do not require users to create an account or provide personal information to access our service. We collect minimal data to operate effectively:\n"
+                "\n"
+                "\n"
+                "**a. Input Data**: "
+                "Any text or content you provide is processed temporarily to generate results. "
+                "This data is not cached, stored, or reused in any way after the processing is complete."
+                "\n"
+                "\n")
+       st.write("**b. Usage Data**: We may collect non-identifiable technical information, such as: "
+                "\n"
+                "- Browser type and version  "
+                "\n"
+                "- Operating System. "
+                "\n"
+                "- General usage patterns (e.g., time spent using the service). "
+                "\n"
+                "- This information helps us improve our service but does not include personal data.")
+       st.markdown("##### 2. No Data Retention or Reuse")
+       st.write("We do not: "
+                "\n"
+                "- Cache your input: All data is processed in real-time and discarded immediately after the service generates results."
+                "\n"
+                "- Use your data for training: Your input is not used to retrain or improve our models.")
+       st.markdown("##### 3. How We Protect Your Privacy")
+       st.write("We use secure protocols to transmit and process your data. "
+                "Since no data is stored or retained, your information cannot be accessed, reused, or shared after your session ends.")
+       st.markdown("##### 4. Data Sharing and Disclosure")
+       st.write("We do not share or sell your data. Any data processed is handled securely and only for the purpose of delivering the service.")
+       st.markdown("##### 5. Your Rights")
+       st.write("Because we do not retain or collect personal data, you do not need to request deletion or modification. ")
+       st.markdown("##### 6. Third-Party Tools")
+       st.write("Our platform may rely on third-party tools or APIs "
+                "(e.g., hosting or model inference). These providers are required to meet strict "
+                "security and privacy standards, and no user data is retained or shared with them beyond "
+                "the real-time processing required to provide results.")
+       st.markdown("##### 7. Updates to This Privacy Statement")
+       st.write("This Privacy Statement may be updated to reflect changes "
+                "in our practices or for compliance purposes. Please review it periodically for updates.")
+       st.write("*This privacy statement was written with help and guidance from ChatGPT.*")
+
+
+
+
+
+
+
+
+
     
     
     
