@@ -138,8 +138,13 @@ with tab2:
     st.markdown("")
     st.subheader("BIASCheck Best Practices", divider="blue")
     st.write(f"In order to ensure a smooth experience with **BIASCheck**, we recommend the following practices:\n"
-             "1. **BIASCheck** can handle multiple sentences at a time, but all sentences must end in a period in order for the tool to properly detect.\n"
-             "2. ")
+             "1. **BIASCheck** can handle multiple sentences at a time, regardless of punctuation! Please see our GitHub repo for a code explanation.\n"
+             "2. **BIASCheck** is, however, punctuation *sensitive*. Meaning, a sentence like \"The sky is blue!\" will "
+             "return as biased, but a sentence like \"The sky is blue.\" will return as neutral."
+             "3. We do not track your data (see our Privacy Statement). As such, as soon as you refresh the page, your content "
+             "and results will disappear. Please externally save any outputs as we do not cache them!")
+    st.subheader("BIASCheck DISCLAIMER", divider="red")
+    st.write("**BIASCheck** is not (remedy)")
     
     with tab3:
        st.subheader(f"Privacy Statement for **BIASCheck**", divider = "gray")
