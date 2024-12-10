@@ -63,17 +63,17 @@ with col2:
     st.title("BIASCheck")
     
 st.subheader("Minimizing subjectivity in language.")
-st.markdown("**BIASCheck** defines subjectivity as \"the quality of being based on or influenced by personal feelings, tastes, or opinions.\" "
+annotated_text("**BIASCheck** defines subjectivity as \"the quality of being based on or influenced by personal feelings, tastes, or opinions.\" "
             "**BIASCheck**'s objective is to assist writing professionals in checking their subjective biases in written language. "
-            "These kinds of biases are often unconsious and difficult to catch without assistance. "
-            "Call on **BIASCheck** to ensure your communications are neutral!")
+            "These kinds of biases are often unconscious and difficult to catch without assistance. "
+            "Call on **BIASCheck** to ensure your communications are ", ("neutral!", "", "#21c354"))
 st.write("Please visit our \"About\" tab below for a brief overview of how **BIASCheck** works and best practices to follow in order to ensure a smooth experience with our tool!")
 
 tab1, tab2, tab3 = st.tabs(["The Tool", "About", "Privacy Statement"])
 
 
 with tab1:
-    text = st.text_input(label="Enter a text example to classify.", value=None, help="See documentation for tips!", placeholder="Text goes here")
+    text = st.text_input(label="Enter text to classify and neutralize.", value=None, help="See documentation for tips!", placeholder="Text goes here")
 
     parameters.LABEL_FONT_SIZE = "0 1.5rem"
 
@@ -123,28 +123,39 @@ with tab1:
         
         annotated_text(f"Your text input had an average **BIASCheck** score of: {avg_bias:.0%} ", (f"{avg_bias_label} score", "", avg_bias_label_color))
 
+        st.subheader("BIASCheck DISCLAIMER", divider="red")
+        st.write("**BIASCheck** is a work in progress. As such, **BIASCheck** does not promise complete neutrality. **BIASCheck** only focuses explicitly on *subjective* biases"
+                 ", and may not catch other types of discriminatory biases or hate speech. "
+                 "**BIASCheck** is not responsible for any harm caused as a result of its product.")
+
 with tab2:
     st.subheader("What is BIASCheck?", divider="blue")
     st.write(f"**BIASCheck** is a multi-model based end-to-end Bias Mitigation system.\n"
              "The tool is comprised of two key model components: a classification task and a neutralization task. ")
-    st.markdown("#### The Classification Task")
+    st.markdown("#### Training Data")
+    st.write("Both tasks are trained on the Wiki Neutrality Corpus (WNC). Here is a link to the "
+             "dataset: [Wiki Neutrality Corpus](https://www.kaggle.com/datasets/chandiragunatilleke/wiki-neutrality-corpus) "
+             "For more information on how the dataset was created, please refer to this [paper](https://arxiv.org/pdf/1911.09709).")
+    st.markdown("#### Classification")
     annotated_text("Your text first passes through a DistilBert-based classification task which classifies each sentence in your input",
                       " as either ", ("Biased", "", "#ffa421"), " or ", ("Neutral","", "#21c354"), " along with an associated bias score. ",
                       "The closer the score is to 100%, the more biased your text is.")
-    st.markdown("#### The Neutralization Task")
+    st.markdown("#### Neutralization")
     annotated_text("After your text has been classified, if the text is considered ", ("Biased", "", "#ffa421"),
-                   " the text is passed through a fine-tuned Llama model to remove subjectivity. The neutralized text is displayed under the classification.")
+                   " the text is passed through a fine-tuned Llama 3.2 model to remove subjectivity. The neutralized text is displayed under the classification.")
     st.markdown("For more information about our mission statement, solution, data pipeline, and technical approach, please go to our website: [BIASCheck](https://sites.ischool.berkeley.edu/biascheck/)")
     st.markdown("")
     st.subheader("BIASCheck Best Practices", divider="blue")
     st.write(f"In order to ensure a smooth experience with **BIASCheck**, we recommend the following practices:\n"
-             "1. **BIASCheck** can handle multiple sentences at a time, regardless of punctuation! Please see our GitHub repo for a code explanation.\n"
+             "1. **BIASCheck** can handle multiple sentences at a time, regardless of punctuation! Please see our [GitHub repo](https://github.com/rachtripoli/biascheck-test) for a code explanation.\n"
              "2. **BIASCheck** is, however, punctuation *sensitive*. Meaning, a sentence like \"The sky is blue!\" will "
-             "return as biased, but a sentence like \"The sky is blue.\" will return as neutral."
+             "return as biased but a sentence like \"The sky is blue.\" will return as neutral.\n"
              "3. We do not track your data (see our Privacy Statement). As such, as soon as you refresh the page, your content "
              "and results will disappear. Please externally save any outputs as we do not cache them!")
     st.subheader("BIASCheck DISCLAIMER", divider="red")
-    st.write("**BIASCheck** is not (remedy)")
+    st.write("**BIASCheck** is a work in progress. As such, **BIASCheck** does not promise complete neutrality. **BIASCheck** only focuses explicitly on *subjective* biases"
+             ", and may not catch other types of discriminatory biases or hate speech. "
+             "**BIASCheck** is not responsible for any harm caused as a result of its product.")
     
     with tab3:
        st.subheader(f"Privacy Statement for **BIASCheck**", divider = "gray")
@@ -191,7 +202,6 @@ with tab2:
        st.markdown("##### 7. Updates to This Privacy Statement")
        st.write("This Privacy Statement may be updated to reflect changes "
                 "in our practices or for compliance purposes. Please review it periodically for updates.")
-       st.write("*This privacy statement was written with help and guidance from ChatGPT.*")
 
 
 
