@@ -11,6 +11,7 @@ from st_files_connection import FilesConnection
 import tempfile
 import zipfile
 import s3fs
+from sentence_splitter import split_into_sentences
 
 # set aws credentials
 aws_access_key_id=st.secrets["aws_access_key_id"]
@@ -46,12 +47,7 @@ st.set_page_config(
     page_title="BIASCheck",
     page_icon=img,
     layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://www.extremelycoolapp.com/help',
-        'Report a bug': "https://www.extremelycoolapp.com/bug",
-        'About': "# This is a header. This is an *extremely* cool app!"
-    }
+    initial_sidebar_state="expanded"
 )
 
 col1, col2 = st.columns([0.09, 0.91], vertical_alignment="center")
@@ -83,7 +79,7 @@ with tab1:
 
     if text:
         # split the text input by sentence
-        text_input = text.split(". ")
+        text_input = split_into_sentences(text)
 
         # tokenize the input using DistilBert Base Cased
         MAX_SEQUENCE_LENGTH = 512
@@ -113,7 +109,7 @@ with tab1:
         else:
            avg_bias_label = "Biased"
         
-        if avg_bias == "Biased":
+        if avg_bias_label == "Biased":
            avg_bias_label_color = "#ffa421"
         else:
            avg_bias_label_color = "#21c354"
