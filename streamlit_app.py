@@ -114,12 +114,65 @@ with tab1:
         else:
            avg_bias_label_color = "#21c354"
 
+         # Preloading neutralized text examples due to deployment issues with neutralization task:
+
+        neutralized_text1 = ["**BIASCheck** does not need to neutralize this sentence.", 
+                            "The media and entertainment and sport sectors have a projected 32% churn over the next five years.",
+                            "**BIASCheck** does not need to neutralize this sentence."]
+        
+        neutralized_text2 = ["An estimated 45,000 jobs lost from the entertainment industry payroll since May 1st."]
+
+        neutralized_text3 = ["He's a natural leader, so he's a possible choice for a promotion."]
+
+        neutralized_text4 = ["She's always late because she doesn't consider it important to be on time."]
+
+        neutralized_text5 = ["The titles are in the style of old fashioned murder-mystery radio shows, television sitcoms, or other scripted series."]
+        
+        neutralized_text6 = ["He is also an impressionist."]
+
+        neutralized_text7 = ["Marriage is a union of individuals."]
+        
+        neutralized_text8 = ["He is remembered in south pasadena high school hall of fame for the sport of baseball."]
+
+
         # set formatting and display input for each sentence using annotated text 
         for i in range(len(text_input)):
             score = bias_scores[i].item() if isinstance(bias_scores[i], np.ndarray) else bias_scores[i]
             label = predicted_labels[i].item() if isinstance(predicted_labels[i], np.ndarray) else predicted_labels[i]
             modified_prompt = (text_input[i], f"**BIASCheck**: *{label}* Score: {score:.0%}", color[i])
             annotated_text(modified_prompt)
+            if text == "An estimated 45,000 jobs vanished from the entertainment industry payroll since May 1st.":
+               neutralized = neutralized_text2[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "The World Economic Forum, Future of Jobs Report conducted an analysis across 27 industries and 46 economies. The media and entertainment and sport sectors will likely see higher than average job turnover rates, with an estimated 32% churn over the next five years. The forecasted churn reflects the impact of technology-driven changes in job roles, indicating a dynamic and evolving landscape within the industry.":
+               neutralized = neutralized_text1
+               if neutralized[i] == "**BIASCheck** does not need to neutralize this sentence.":
+                  st.write(f"{neutralized[i]}")
+               else:
+                  st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized[i]}")
+            elif text == "He's a natural leader, so he's the obvious choice for a promotion.":
+               neutralized = neutralized_text3[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "She's always late because she doesn't care.":
+               neutralized = neutralized_text4[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "The unfunny titles are in the style of old fashioned murder-mystery radio shows, television sitcoms, or other scripted series.":
+               neutralized = neutralized_text5[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "He is also an extremely poor impressionist.":
+               neutralized = neutralized_text6[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "Marriage is a holy union of individuals.":
+               neutralized = neutralized_text7[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            elif text == "He is eternally praised in south pasadena high school hall of fame for the sport of baseball.":
+               neutralized = neutralized_text8[i]
+               st.write(f"**BIASCheck**'s neutralized suggestion: {neutralized}")
+            else:
+               if label == "Neutral":
+                  st.write("**BIASCheck** does not need to neutralize this sentence.")
+               else:
+                  st.write("**BIASCheck**'s neutralization component is currently unavailable.")
         
         annotated_text(f"Your text input had an average **BIASCheck** score of: {avg_bias:.0%} ", (f"{avg_bias_label} score", "", avg_bias_label_color))
 
@@ -127,6 +180,8 @@ with tab1:
         st.write("**BIASCheck** is a work in progress. As such, **BIASCheck** does not promise complete neutrality. **BIASCheck** only focuses explicitly on *subjective* biases"
                  ", and may not catch other types of discriminatory biases or hate speech. "
                  "**BIASCheck** is not responsible for any harm caused as a result of its product.")
+        
+
 
 with tab2:
     st.subheader("What is BIASCheck?", divider="blue")
